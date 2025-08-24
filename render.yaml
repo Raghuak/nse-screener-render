@@ -55,7 +55,7 @@ services:
   - type: cron
     name: nse-cron-morning
     env: docker
-    schedule: "CRON_TZ=Asia/Kolkata 10 9 * * MON-FRI"
+    schedule: "40 3 * * 1-5"        # 09:10 IST
     dockerfilePath: ./jobs/Dockerfile
     envVars:
       - key: DATABASE_URL
@@ -68,7 +68,7 @@ services:
   - type: cron
     name: nse-cron-midday
     env: docker
-    schedule: "CRON_TZ=Asia/Kolkata 30 12 * * MON-FRI"
+    schedule: "0 7 * * 1-5"         # 12:30 IST
     dockerfilePath: ./jobs/Dockerfile
     envVars:
       - key: DATABASE_URL
@@ -81,7 +81,7 @@ services:
   - type: cron
     name: nse-cron-eod
     env: docker
-    schedule: "CRON_TZ=Asia/Kolkata 35 15 * * MON-FRI"
+    schedule: "5 10 * * 1-5"        # 15:35 IST
     dockerfilePath: ./jobs/Dockerfile
     envVars:
       - key: DATABASE_URL
