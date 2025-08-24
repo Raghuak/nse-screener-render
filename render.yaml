@@ -1,0 +1,91 @@
+services:
+  - type: web
+    name: nse-ui
+    env: docker
+    plan: starter
+    branch: main
+    autoDeploy: true
+    dockerfilePath: ./ui/Dockerfile
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase: nse-db
+        property: connectionString
+      - key: APP_ENV
+        value: prod
+      - key: TZ
+        value: Asia/Kolkata
+
+  - type: worker
+    name: nse-worker
+    env: docker
+    plan: starter
+    branch: main
+    autoDeploy: true
+    dockerfilePath: ./worker/Dockerfile
+    numInstances: 1
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase: nse-db
+        property: connectionString
+      - key: APP_ENV
+        value: prod
+      - key: TZ
+        value: Asia/Kolkata
+      - key: PAPER_TRADING
+        value: "true"
+      - key: DATA_PROVIDER
+        value: "YAHOO"        # switch to ZERODHA_WS when ready
+      - key: SYMBOLS
+        value: "RELIANCE,TCS,HDFCBANK,ICICIBANK,INFY,SBIN"
+      - key: SCAN_INTERVAL_SEC
+        value: "60"
+      - key: ZERODHA_API_KEY
+        sync: false
+      - key: ZERODHA_API_SECRET
+        sync: false
+      - key: ZERODHA_ACCESS_TOKEN
+        sync: false
+      - key: ZERODHA_PRODUCT
+        value: "MIS"
+      - key: ZERODHA_EXCHANGE
+        value: "NSE"
+
+  - type: cron
+    name: nse-cron-morning
+    env: docker
+    schedule: "CRON_TZ=Asia/Kolkata 10 9 * * MON-FRI"
+    dockerfilePath: ./jobs/Dockerfile
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase: nse-db
+        property: connectionString
+      - key: JOB_NAME
+        value: preopen-scan
+
+  - type: cron
+    name: nse-cron-midday
+    env: docker
+    schedule: "CRON_TZ=Asia/Kolkata 30 12 * * MON-FRI"
+    dockerfilePath: ./jobs/Dockerfile
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase: nse-db
+        property: connectionString
+      - key: JOB_NAME
+        value: midday-rescreen
+
+  - type: cron
+    name: nse-cron-eod
+    env: docker
+    schedule: "CRON_TZ=Asia/Kolkata 35 15 * * MON-FRI"
+    dockerfilePath: ./jobs/Dockerfile
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase: nse-db
+        property: connectionString
+      - key: JOB_NAME
+        value: eod-cleanup
+
+databases:
+  - name: nse-db
+    plan: starter
