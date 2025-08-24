@@ -93,4 +93,100 @@ services:
 
 databases:
   - name: nse-db
+    plan: basic-256mb
+services:
+  - type: web
+    name: nse-ui
+    env: docker
+    plan: starter
+    branch: main
+    autoDeploy: true
+    dockerfilePath: ./ui/Dockerfile
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: nse-db
+          property: connectionString
+      - key: APP_ENV
+        value: prod
+      - key: TZ
+        value: Asia/Kolkata
+
+  - type: worker
+    name: nse-worker
+    env: docker
+    plan: starter
+    branch: main
+    autoDeploy: true
+    dockerfilePath: ./worker/Dockerfile
+    numInstances: 1
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: nse-db
+          property: connectionString
+      - key: APP_ENV
+        value: prod
+      - key: TZ
+        value: Asia/Kolkata
+      - key: PAPER_TRADING
+        value: "true"
+      - key: DATA_PROVIDER
+        value: "YAHOO"        # switch to ZERODHA_WS when ready
+      - key: SYMBOLS
+        value: "RELIANCE,TCS,HDFCBANK,ICICIBANK,INFY,SBIN"
+      - key: SCAN_INTERVAL_SEC
+        value: "60"
+      - key: ZERODHA_API_KEY
+        sync: false
+      - key: ZERODHA_API_SECRET
+        sync: false
+      - key: ZERODHA_ACCESS_TOKEN
+        sync: false
+      - key: ZERODHA_PRODUCT
+        value: "MIS"
+      - key: ZERODHA_EXCHANGE
+        value: "NSE"
+
+  - type: cron
+    name: nse-cron-morning
+    env: docker
+    schedule: "40 3 * * 1-5"        # 09:10 IST
+    dockerfilePath: ./jobs/Dockerfile
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: nse-db
+          property: connectionString
+      - key: JOB_NAME
+        value: preopen-scan
+
+  - type: cron
+    name: nse-cron-midday
+    env: docker
+    schedule: "0 7 * * 1-5"         # 12:30 IST
+    dockerfilePath: ./jobs/Dockerfile
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: nse-db
+          property: connectionString
+      - key: JOB_NAME
+        value: midday-rescreen
+
+  - type: cron
+    name: nse-cron-eod
+    env: docker
+    schedule: "5 10 * * 1-5"        # 15:35 IST
+    dockerfilePath: ./jobs/Dockerfile
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: nse-db
+          property: connectionString
+      - key: JOB_NAME
+        value: eod-cleanup
+
+databases:
+  - name: nse-db
     plan: starter
