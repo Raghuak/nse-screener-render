@@ -8,8 +8,9 @@ services:
     dockerfilePath: ./ui/Dockerfile
     envVars:
       - key: DATABASE_URL
-        fromDatabase: nse-db
-        property: connectionString
+        fromDatabase:
+          name: nse-db
+          property: connectionString
       - key: APP_ENV
         value: prod
       - key: TZ
@@ -25,8 +26,9 @@ services:
     numInstances: 1
     envVars:
       - key: DATABASE_URL
-        fromDatabase: nse-db
-        property: connectionString
+        fromDatabase:
+          name: nse-db
+          property: connectionString
       - key: APP_ENV
         value: prod
       - key: TZ
@@ -57,8 +59,9 @@ services:
     dockerfilePath: ./jobs/Dockerfile
     envVars:
       - key: DATABASE_URL
-        fromDatabase: nse-db
-        property: connectionString
+        fromDatabase:
+          name: nse-db
+          property: connectionString
       - key: JOB_NAME
         value: preopen-scan
 
@@ -69,8 +72,9 @@ services:
     dockerfilePath: ./jobs/Dockerfile
     envVars:
       - key: DATABASE_URL
-        fromDatabase: nse-db
-        property: connectionString
+        fromDatabase:
+          name: nse-db
+          property: connectionString
       - key: JOB_NAME
         value: midday-rescreen
 
@@ -81,8 +85,9 @@ services:
     dockerfilePath: ./jobs/Dockerfile
     envVars:
       - key: DATABASE_URL
-        fromDatabase: nse-db
-        property: connectionString
+        fromDatabase:
+          name: nse-db
+          property: connectionString
       - key: JOB_NAME
         value: eod-cleanup
 
