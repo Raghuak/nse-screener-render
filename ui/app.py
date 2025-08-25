@@ -43,9 +43,7 @@ if cols_main:
     st.dataframe(df[cols_main], use_container_width=True)
 else:
     st.info("No BUY candidates yet — waiting for worker…")
-<<<<<<< HEAD
-
-=======
+#=======
 
 # --- Watchlist ---
 st.subheader("Watchlist")
