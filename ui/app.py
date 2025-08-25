@@ -63,8 +63,8 @@ st.set_page_config(page_title="NSE Top 10", page_icon="📊",
 layout="wide") DB_URL = os.environ.get("DATABASE_URL") engine = 
 create_engine(DB_URL, pool_pre_ping=True)
 
-st.title("📊 Top 10 to Buy — NSE Screener") st.caption("Session VWAP • 
-EMA20 • RSI14 • Gap% • RelVol")
+st.title("📊 Top 10 to Buy — NSE Screener") st.caption("Session VWAP • EMA20 • RSI14 • Gap% • RelVol")
+
 
 @st.cache_data(ttl=15) def load(name: str) -> pd.DataFrame:
 nano ui/app.py
