@@ -1,26 +1,53 @@
-import os, time
+import os
 import pandas as pd
 import streamlit as st
 from sqlalchemy import create_engine
 
-st.set_page_config(page_title="NSE Top 10", page_icon="📊", layout="wide")
-DB_URL = os.environ.get("DATABASE_URL")
-engine = create_engine(DB_URL, pool_pre_ping=True)
+DB_URL = os.getenv("DATABASE_URL")
+engine = create_engine(DB_URL) if DB_URL else None
+
+@st.cache_data(ttl=60)
+def load(name: str):
+    if engine is None:
+        return pd.DataFrame()
+    return pd.read_sql(f"SELECT * FROM {name} ORDER BY id DESC LIMIT 500", engine)
+
+# 🔧 Normalize columns (map symbol → ticker if needed)
+def normalize_cols(df):
+    if df is None or df.empty:
+        return df
+    if "ticker" not in df.columns and "symbol" in df.columns:
+        df = df.rename(columns={"symbol": "ticker"})
+    for col in ["rsi14", "ema20", "vwap", "close", "score"]:
+        if col in df.columns:
+            df[col] = pd.to_numeric(df[col], errors="coerce")
+    return df
+
+# Load data
+df = load("top10_buy_view") if DB_URL else pd.DataFrame()
+watch = load("watchlist_view") if DB_URL else pd.DataFrame()
+
+# Normalize
+df = normalize_cols(df)
+watch = normalize_cols(watch)
+
+st.set_page_config(page_title="📊 Top 10 to Buy — NSE Screener", layout="wide")
 
 st.title("📊 Top 10 to Buy — NSE Screener")
 st.caption("Session VWAP • EMA20 • RSI14 • Gap% • RelVol")
 
-@st.cache_data(ttl=15)
-def load(name: str) -> pd.DataFrame:
-    return pd.read_sql(f"SELECT * FROM {name} ORDER BY id DESC LIMIT 500", engine)
-
-df = load("top10_buy_view") if DB_URL else pd.DataFrame()
-if df.empty:
-    st.info("No BUY candidates yet — waiting for worker…")
+# --- Top 10 BUY ---
+st.subheader("Top 10 BUY Candidates")
+cols_main = [c for c in ["ticker","company","decision","score","rsi14","ema20","vwap","close"] if c in df.columns]
+if cols_main:
+    st.dataframe(df[cols_main], use_container_width=True)
 else:
-    st.dataframe(df[["ticker","company","decision","score","rsi14","ema20","vwap","close"]], use_container_width=True)
+    st.info("No BUY candidates yet — waiting for worker…")
 
-st.divider()
-watch = load("watchlist_view") if DB_URL else pd.DataFrame()
-if not watch.empty:
-    st.dataframe(watch[["ticker","company","gap_pct","relvol"]], use_container_width=True)
+# --- Watchlist ---
+st.subheader("Watchlist")
+cols_watch = [c for c in ["ticker","company","reason","price","rsi14","ema20","vwap","note"] if c in watch.columns]
+if cols_watch:
+    st.dataframe(watch[cols_watch], use_container_width=True)
+else:
+    st.info("No watchlist data yet.")
