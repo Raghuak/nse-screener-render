@@ -1,4 +1,6 @@
-streamlit==1.36.0
-psycopg2-binary==2.9.9
-SQLAlchemy==2.0.31
-pandas==2.2.2
+streamlit
+pandas
+psycopg2-binary
+SQLAlchemy
+requests
+python-dotenv

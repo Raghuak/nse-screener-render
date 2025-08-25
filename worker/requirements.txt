@@ -1,5 +1,6 @@
-pandas==2.2.2
-SQLAlchemy==2.0.31
-psycopg2-binary==2.9.9
-requests==2.32.3
-kiteconnect>=4.2.0
+pandas
+psycopg2-binary
+SQLAlchemy
+requests
+websockets
+python-dotenv
